@@ -1,0 +1,54 @@
+[
+  {
+    "id": 1,
+    "title": "Xbox 360",
+    "description": "Consola de Microsoft",
+    "code": "CP1",
+    "price": 1000,
+    "status": false,
+    "stock": 15,
+    "category": "Consolas",
+    "thumbnails": [
+      "xbox360_1.jpg"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "PlayStation 4",
+    "description": "Consola de Sony",
+    "code": "CP2",
+    "price": 1500,
+    "status": false,
+    "stock": 15,
+    "category": "Consolas",
+    "thumbnails": [
+      "playstation4_1.jpg"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "pc",
+    "description": "Consola de Sony",
+    "code": "CP2",
+    "price": 1500,
+    "status": false,
+    "stock": 15,
+    "category": "Consolas",
+    "thumbnails": [
+      "playstation4_1.jpg"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "pultima",
+    "description": "asd",
+    "code": "1223",
+    "price": 234,
+    "status": true,
+    "stock": 10,
+    "category": "Consolas",
+    "thumbnails": [
+      "111.jpg"
+    ]
+  }
+]

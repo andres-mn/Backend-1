@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Time Products</title>
+    <style>
+        ul {
+            list-style-type: none;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        img {
+            width: 100px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Productos en Tiempo Real</h1>
+    
+    <!-- Formulario para agregar un nuevo producto -->
+    <h2>Agregar Producto</h2>
+    <form id="add-product-form">
+        <label for="title">Título:</label>
+        <input type="text" id="title" name="title" required><br>
+
+        <label for="description">Descripción:</label>
+        <input type="text" id="description" name="description" required><br>
+
+        <label for="code">Código:</label>
+        <input type="text" id="code" name="code" required><br>
+
+        <label for="price">Precio:</label>
+        <input type="number" id="price" name="price" required><br>
+
+        <label for="stock">Stock:</label>
+        <input type="number" id="stock" name="stock" required><br>
+
+        <label for="status">Estado (Activo/Inactivo):</label>
+        <select id="status" name="status">
+            <option value="true">Activo</option>
+            <option value="false">Inactivo</option>
+        </select><br>
+
+        <label for="category">Categoría:</label>
+        <input type="text" id="category" name="category" required><br>
+
+        <label for="thumbnails">Imágenes (separadas por coma):</label>
+        <input type="text" id="thumbnails" name="thumbnails"><br>
+
+        <button type="submit">Agregar Producto</button>
+    </form>
+
+    <!-- Lista de productos -->
+    <ul id="product-list">
+        {{#each products}}
+            <li id="product-{{this.id}}">
+                <strong>{{this.title}}</strong><br>
+                Descripción: {{this.description}}<br>
+                Código: {{this.code}}<br>
+                Precio: ${{this.price}}<br>
+                Estado: {{this.status}}<br>
+                Stock: {{this.stock}}<br>
+                Categoría: {{this.category}}<br>
+                <ul>
+                    {{#each this.thumbnails}}
+                        <li><img src="/images/{{this}}" alt="Imagen"></li>
+                    {{/each}}
+                </ul>
+                <button onclick="deleteProduct({{this.id}})">Eliminar</button>
+            </li>
+        {{/each}}
+    </ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Conectar a WebSocket
+        const socket = io();
+
+        // Escuchar por actualizaciones de productos en tiempo real
+        socket.on('updateProducts', (products) => {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = ''; // Limpiar lista antes de actualizar
+
+            // Recorrer los productos y agregarlos a la lista
+            products.forEach(product => {
+                const li = document.createElement('li');
+                li.id = `product-${product.id}`;
+                li.innerHTML = `
+                    <strong>${product.title}</strong><br>
+                    Descripción: ${product.description}<br>
+                    Código: ${product.code}<br>
+                    Precio: $${product.price}<br>
+                    Estado: ${product.status ? '(Activo)' : '(Inactivo)'}<br>
+                    Stock: ${product.stock}<br>
+                    Categoría: ${product.category}<br>
+                    <ul>
+                        ${(product.thumbnails || []).map(thumbnail => `<li><img src="/images/${thumbnail}" alt="Imagen"></li>`).join('')}
+                    </ul>
+                    <button onclick="deleteProduct(${product.id})">Eliminar</button>
+                `;
+                productList.appendChild(li);
+            });
+        });
+
+        // Enviar los datos del formulario para agregar un producto
+        const addProductForm = document.getElementById('add-product-form');
+        addProductForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const productData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                code: document.getElementById('code').value,
+                price: parseFloat(document.getElementById('price').value),
+                stock: parseInt(document.getElementById('stock').value),
+                status: document.getElementById('status').value === 'true',
+                category: document.getElementById('category').value,
+                thumbnails: document.getElementById('thumbnails').value.split(',')
+            };
+
+            // Enviar al servidor el producto
+            fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Error en la solicitud');
+            })
+            .then(data => {
+                // Limpiar el formulario
+                addProductForm.reset();
+                // Actualizar la lista de productos en tiempo real
+                socket.emit('updateProducts', data);
+            })
+            .catch(error => console.error('Error al agregar el producto:', error));
+        });
+
+        // Función para eliminar un producto
+        function deleteProduct(productId) {
+            fetch(`/api/products/${productId}`, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        socket.emit('updateProducts');
+                    }
+                    throw new Error('Error en la solicitud');
+                })
+                .catch(error => console.error('Error al eliminar el producto:', error));
+        }
+    </script>
+</body>
+</html>

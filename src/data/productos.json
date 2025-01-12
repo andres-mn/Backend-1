@@ -37,18 +37,5 @@
     "thumbnails": [
       "playstation4_1.jpg"
     ]
-  },
-  {
-    "id": 4,
-    "title": "pultima",
-    "description": "asd",
-    "code": "1223",
-    "price": 234,
-    "status": true,
-    "stock": 10,
-    "category": "Consolas",
-    "thumbnails": [
-      "111.jpg"
-    ]
   }
 ]
